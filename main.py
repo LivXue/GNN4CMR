@@ -14,14 +14,15 @@ from evaluate import fx_calc_map_label
 
 if __name__ == '__main__':
     # environmental setting: setting the following parameters based on your experimental environment.
-    os.environ["CUDA_VISIBLE_DEVICES"] = "5"
-    dataset = 'NUS-WIDE-TC21'
-    embedding = 'glove'
-    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+    dataset = 'mirflickr'  # 'mirflickr' or 'NUS-WIDE-TC21' or 'MS-COCO'
+    model = 'I-GNN'  # 'I-GNN' or 'P-GNN'
+    embedding = 'glove'  # 'glove' or 'googlenews' or 'fasttext' or 'None'
+
     # data parameters
     DATA_DIR = 'data/' + dataset + '/'
-    EVAL = False
-    INCOMPLETE = True
+    EVAL = False    # True for evaluation, False for training
+    INCOMPLETE = True   # True for incomplete-modal learning, vice versa
 
     if dataset == 'mirflickr':
         alpha = 0.2
@@ -32,8 +33,8 @@ if __name__ == '__main__':
         lr2 = 4e-6
         betas = (0.5, 0.999)
         t = 0.4
-        gnn = 'GCN'
-        n_layers = 5
+        gnn = 'GCN'  # 'GCN' or 'GAT'
+        n_layers = 5    # number of GNN layers
         k = 5
     elif dataset == 'NUS-WIDE-TC21':
         alpha = 0.2
@@ -85,11 +86,15 @@ if __name__ == '__main__':
 
     print('...Data loading is completed...')
 
-    model_ft = I_GNN(img_input_dim=input_data_par['img_dim'], text_input_dim=input_data_par['text_dim'],
-                     num_classes=input_data_par['num_class'], t=t, k=k, inp=inp, GNN=gnn, n_layers=n_layers).cuda()
-    #model_ft = P_GNN(img_input_dim=input_data_par['img_dim'], text_input_dim=input_data_par['text_dim'],
-    #                 num_classes=input_data_par['num_class'], t=t, adj_file='data/' + dataset + '/adj.mat', inp=inp,
-    #                 GNN=gnn, n_layers=n_layers).cuda()
+    if model == 'I-GNN':
+        model_ft = I_GNN(img_input_dim=input_data_par['img_dim'], text_input_dim=input_data_par['text_dim'],
+                         num_classes=input_data_par['num_class'], t=t, k=k, inp=inp, GNN=gnn, n_layers=n_layers).cuda()
+    elif model == 'P-GNN':
+        model_ft = P_GNN(img_input_dim=input_data_par['img_dim'], text_input_dim=input_data_par['text_dim'],
+                         num_classes=input_data_par['num_class'], t=t, adj_file='data/' + dataset + '/adj.mat', inp=inp,
+                         GNN=gnn, n_layers=n_layers).cuda()
+    else:
+        raise NotImplementedError("The model should be 'I-GNN' or 'P-GNN'.")
     params_to_update = list(model_ft.parameters())
 
     # Observe that all parameters are being optimized
@@ -100,12 +105,15 @@ if __name__ == '__main__':
         print('...Training is beginning...')
         # Train and evaluate
         if INCOMPLETE:
-            model_ft, img_acc_hist, txt_acc_hist, loss_hist = train_model(model_ft, data_loader, optimizer, alpha, beta, max_epoch)
+            model_ft, img_acc_hist, txt_acc_hist, loss_hist = train_model(model_ft, data_loader, optimizer, alpha, beta,
+                                                                          max_epoch)
             data_loader, input_data_par = get_loader(DATA_DIR, batch_size, True)
             optimizer = optim.Adam(params_to_update, lr=lr2, betas=betas)
-            model_ft, img_acc_hist, txt_acc_hist, loss_hist = train_model_incomplete(model_ft, data_loader, optimizer, alpha, beta, max_epoch)
+            model_ft, img_acc_hist, txt_acc_hist, loss_hist = train_model_incomplete(model_ft, data_loader, optimizer,
+                                                                                     alpha, beta, max_epoch)
         else:
-            model_ft, img_acc_hist, txt_acc_hist, loss_hist = train_model(model_ft, data_loader, optimizer, alpha, beta, max_epoch)
+            model_ft, img_acc_hist, txt_acc_hist, loss_hist = train_model(model_ft, data_loader, optimizer, alpha, beta,
+                                                                          max_epoch)
         print('...Training is completed...')
 
         torch.save(model_ft.state_dict(), 'model/DALGNN_' + dataset + '.pth')

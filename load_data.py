@@ -56,7 +56,7 @@ def get_loader(path, batch_size, INCOMPLETE=False):
     label_test = loadmat(path + "test_lab.mat")['test_lab']
 
     # Incomplete modal
-    split = img_train.shape[0] // 20#5
+    split = img_train.shape[0] // 5
     text_train[split * 1: split * 3] = np.zeros_like(text_train[split * 1: split * 3])
     img_train[split * 3: split * 5] = np.zeros_like(img_train[split * 3: split * 5])
 
@@ -66,7 +66,7 @@ def get_loader(path, batch_size, INCOMPLETE=False):
 
     if INCOMPLETE:
         shuffle = {'train_complete': True, 'train_img': True, 'train_text': True, 'test': False}
-        '''dataset = {'train_complete': CustomDataSet(images=imgs['train'][:split * 1],
+        dataset = {'train_complete': CustomDataSet(images=imgs['train'][:split * 1],
                                                    texts=texts['train'][:split * 1],
                                                    labels=labels['train'][:split * 1]),
                    'train_img': SingleModalDataSet(data=imgs['train'][split * 1:split * 3],
@@ -79,23 +79,6 @@ def get_loader(path, batch_size, INCOMPLETE=False):
                       'train_img': DataLoaderX(dataset['train_img'], batch_size=batch_size // 5 * 2,
                                                shuffle=shuffle['train_img'], num_workers=0),
                       'train_text': DataLoaderX(dataset['train_text'], batch_size=batch_size // 5 * 2,
-                                                shuffle=shuffle['train_text'], num_workers=0),
-                      'test': DataLoaderX(dataset['test'], batch_size=batch_size,
-                                          shuffle=shuffle['test'], num_workers=0),
-                      }'''
-        dataset = {'train_complete': CustomDataSet(images=imgs['train'][:split * 16],
-                                                   texts=texts['train'][:split * 16],
-                                                   labels=labels['train'][:split * 16]),
-                   'train_img': SingleModalDataSet(data=imgs['train'][split * 16:split * 18],
-                                                   labels=labels['train'][split * 16:split * 18]),
-                   'train_text': SingleModalDataSet(data=texts['train'][split * 18: split * 20],
-                                                    labels=labels['train'][split * 18: split * 20]),
-                   'test': CustomDataSet(images=imgs['test'], texts=texts['test'], labels=labels['test'])}
-        dataloader = {'train_complete': DataLoaderX(dataset['train_complete'], batch_size=batch_size // 20 * 16,
-                                                    shuffle=shuffle['train_complete'], num_workers=0),
-                      'train_img': DataLoaderX(dataset['train_img'], batch_size=batch_size // 20 * 2,
-                                               shuffle=shuffle['train_img'], num_workers=0),
-                      'train_text': DataLoaderX(dataset['train_text'], batch_size=batch_size // 20 * 2,
                                                 shuffle=shuffle['train_text'], num_workers=0),
                       'test': DataLoaderX(dataset['test'], batch_size=batch_size,
                                           shuffle=shuffle['test'], num_workers=0),
