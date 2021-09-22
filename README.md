@@ -45,7 +45,7 @@ Here we provide the implementation of our proposed models, along with datasets. 
 
 ## Process
  - Place the datasets in `data/`
- - Set the experimental parameters in `main.py`.
+ - Set the experiment parameters in `main.py`.
  - Train a model:
  ```bash
  python main.py
