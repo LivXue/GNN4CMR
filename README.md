@@ -7,18 +7,14 @@ This repository contains the author's implementation in PyTorch for the paper "L
 
 > The structures of P-GNN  
 
-<div align="center">
-    <img src="docs/images/p-gnn.jpg" width="100%" height ="100%" alt="p-gnn.jpg" />
-</div>
+![p-gnn.jpg](docs/images/p-gnn.jpg)
 <p align = 'center'>
     <small>The overall structure of P-GNN.</small>
 </p>
 
 > The structures of I-GNN  
 
-<div align="center">
-    <img src="docs/images/i-gnn.jpg" width="100%" height ="100%" alt="i-gnn.jpg" />
-</div>
+![i-gnn.jpg](docs/images/i-gnn.jpg)
 <p align = 'center'>
     <small>The overall structure of I-GNN.</small>
 </p>
