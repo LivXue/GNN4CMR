@@ -1,23 +1,6 @@
-## Learning Graph Neural Networks with Dual Adversarial Networks for Cross-Modal Retrieval
+## Dual Adversarial Graph Neural Networks for Multi-label Cross-modal Retrieval
 
-This repository contains the author's implementation in PyTorch for the paper "Learning Graph Neural Networks with Dual Adversarial Networks for Cross-Modal Retrieval".
-
-
-## Overview
-
-> The structures of P-GNN  
-
-![p-gnn.jpg](docs/images/p-gnn.jpg)
-<p align = 'center'>
-    <small>The overall structure of P-GNN.</small>
-</p>
-
-> The structures of I-GNN  
-
-![i-gnn.jpg](docs/images/i-gnn.jpg)
-<p align = 'center'>
-    <small>The overall structure of I-GNN.</small>
-</p>
+This repository contains the author's implementation in PyTorch for the AAAI-21 paper "Dual Adversarial Graph Neural Networks for Multi-label Cross-modal Retrieval".
 
 
 ## Dependencies
@@ -53,4 +36,18 @@ Here we provide the implementation of our proposed models, along with datasets. 
  - Modify the parameter `EVAL = True` in `main.py` for evaluation:
   ```bash
  python main.py
+```
+
+## Citation
+If you find our work or the code useful, please consider cite our paper using:
+```bash
+@article{Qian_Xue_Zhang_Fang_Xu_2021, 
+  title={Dual Adversarial Graph Neural Networks for Multi-label Cross-modal Retrieval}, 
+  volume={35}, 
+  number={3}, 
+  journal={Proceedings of the AAAI Conference on Artificial Intelligence}, 
+  author={Qian, Shengsheng and Xue, Dizhan and Zhang, Huaiwen and Fang, Quan and Xu, Changsheng}, 
+  year={2021}, 
+  pages={2440-2448} 
+}
 ```
