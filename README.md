@@ -22,7 +22,7 @@ You can download the features of the datasets from:
 Here we provide the implementation of our proposed models, along with datasets. The repository is organised as follows:
 
  - `data/` contains the necessary dataset files for NUS-WIDE, MIRFlickr and MS-COCO;
- - `models.py` contains the implementation of the `DALGNN`;
+ - `models.py` contains the implementation of the `P-GNN(DAGNN)` and `I-GNN`;
  
  Finally, `main.py` puts all of the above together and can be used to execute a full training run on MIRFlcikr or NUS-WIDE or MS-COCO.
 
