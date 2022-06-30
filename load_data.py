@@ -1,3 +1,4 @@
+import torch
 from torch.utils.data.dataset import Dataset
 from scipy.io import loadmat, savemat
 from torch.utils.data import DataLoader
@@ -12,11 +13,7 @@ class DataLoaderX(DataLoader):
 
 
 class CustomDataSet(Dataset):
-    def __init__(
-            self,
-            images,
-            texts,
-            labels):
+    def __init__(self, images, texts, labels):
         self.images = images
         self.texts = texts
         self.labels = labels
@@ -47,7 +44,7 @@ class SingleModalDataSet(Dataset):
         return count
 
 
-def get_loader(path, batch_size, INCOMPLETE=False):
+def get_loader(path, batch_size, INCOMPLETE=False, USE_INCOMPLETE=False):
     img_train = loadmat(path + "train_img.mat")['train_img']
     img_test = loadmat(path + "test_img.mat")['test_img']
     text_train = loadmat(path + "train_txt.mat")['train_txt']
@@ -57,14 +54,15 @@ def get_loader(path, batch_size, INCOMPLETE=False):
 
     # Incomplete modal
     split = img_train.shape[0] // 5
-    text_train[split * 1: split * 3] = np.zeros_like(text_train[split * 1: split * 3])
-    img_train[split * 3: split * 5] = np.zeros_like(img_train[split * 3: split * 5])
+    if INCOMPLETE:
+        text_train[split * 1: split * 3] = np.zeros_like(text_train[split * 1: split * 3])
+        img_train[split * 3: split * 5] = np.zeros_like(img_train[split * 3: split * 5])
 
     imgs = {'train': img_train, 'test': img_test}
     texts = {'train': text_train, 'test': text_test}
     labels = {'train': label_train, 'test': label_test}
 
-    if INCOMPLETE:
+    if USE_INCOMPLETE:
         shuffle = {'train_complete': True, 'train_img': True, 'train_text': True, 'test': False}
         dataset = {'train_complete': CustomDataSet(images=imgs['train'][:split * 1],
                                                    texts=texts['train'][:split * 1],

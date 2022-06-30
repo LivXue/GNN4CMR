@@ -121,9 +121,11 @@ class ImgNN(nn.Module):
 
     def __init__(self, input_dim=4096, output_dim=1024):
         super(ImgNN, self).__init__()
+        self.bn = nn.BatchNorm1d(input_dim)
         self.denseL1 = nn.Linear(input_dim, output_dim)
 
     def forward(self, x):
+        x = self.bn(x)
         out = F.relu(self.denseL1(x))
         return out
 
@@ -133,9 +135,11 @@ class TextNN(nn.Module):
 
     def __init__(self, input_dim=1024, output_dim=1024):
         super(TextNN, self).__init__()
+        self.bn = nn.BatchNorm1d(input_dim)
         self.denseL1 = nn.Linear(input_dim, output_dim)
 
     def forward(self, x):
+        x = self.bn(x)
         out = F.relu(self.denseL1(x))
         return out
 
@@ -159,14 +163,16 @@ class ModalClassifier(nn.Module):
 
     def __init__(self, input_dim=40):
         super(ModalClassifier, self).__init__()
+        self.bn = nn.BatchNorm1d(input_dim)
         self.denseL1 = nn.Linear(input_dim, input_dim // 4)
         self.denseL2 = nn.Linear(input_dim // 4, input_dim // 16)
         self.denseL3 = nn.Linear(input_dim // 16, 2)
 
     def forward(self, x):
         x = ReverseLayerF.apply(x, 1.0)
-        out = self.denseL1(x)
-        out = self.denseL2(out)
+        x = self.bn(x)
+        out = F.relu(self.denseL1(x))
+        out = F.relu(self.denseL2(out))
         out = self.denseL3(out)
         return out
 
@@ -176,10 +182,12 @@ class ImgDec(nn.Module):
 
     def __init__(self, input_dim=1024, output_dim=4096, hidden_dim=2048):
         super(ImgDec, self).__init__()
+        self.bn = nn.BatchNorm1d(input_dim)
         self.denseL1 = nn.Linear(input_dim, hidden_dim)
         self.denseL2 = nn.Linear(hidden_dim, output_dim)
 
     def forward(self, x):
+        x = self.bn(x)
         out = F.relu(self.denseL1(x))
         out = F.relu(self.denseL2(out))
         return out
@@ -190,10 +198,12 @@ class TextDec(nn.Module):
 
     def __init__(self, input_dim=1024, output_dim=300, hidden_dim=512):
         super(TextDec, self).__init__()
+        self.bn = nn.BatchNorm1d(input_dim)
         self.denseL1 = nn.Linear(input_dim, hidden_dim)
         self.denseL2 = nn.Linear(hidden_dim, output_dim)
 
     def forward(self, x):
+        x = self.bn(x)
         out = F.leaky_relu(self.denseL1(x), 0.2)
         out = F.leaky_relu(self.denseL2(out), 0.2)
         return out

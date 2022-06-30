@@ -1,6 +1,6 @@
-## Dual Adversarial Graph Neural Networks for Multi-label Cross-modal Retrieval
+## Integrating Multi-Label Contrastive Learning with Dual Adversarial Graph Neural Networks for Cross-Modal Retrieval
 
-This repository contains the author's implementation in PyTorch for the AAAI-21 paper "Dual Adversarial Graph Neural Networks for Multi-label Cross-modal Retrieval".
+This repository contains the author's implementation in PyTorch for the AAAI-21 paper "Dual Adversarial Label-aware Graph Neural Networks for Cross-modal Retrieval" and the TPAMI paper "Integrating Multi-Label Contrastive Learning with Dual Adversarial Graph Neural Networks for Cross-Modal Retrieval".
 
 
 ## Dependencies
@@ -13,7 +13,7 @@ This repository contains the author's implementation in PyTorch for the AAAI-21 
 
 ## Datasets
 You can download the features of the datasets from:
- - MIRFlickr, 
+ - MIRFlickr, [OneDrive](https://pkueducn-my.sharepoint.com/:f:/g/personal/zszhong_pku_edu_cn/EpLD8yNN2lhIpBgQ7Kl8LKABzM68icvJJahchO7pYNPV1g?e=IYoeqn), [BaiduPan(password: 8dub)](https://pan.baidu.com/s/1o5jSliFjAezBavyBOiJxew)
  - NUS-WIDE(top-21 concepts),
  - MS-COCO
  
@@ -21,8 +21,8 @@ You can download the features of the datasets from:
 
 Here we provide the implementation of our proposed models, along with datasets. The repository is organised as follows:
 
- - `data/` contains the necessary dataset files for NUS-WIDE, MIRFlickr and MS-COCO;
- - `models.py` contains the implementation of the `P-GNN(DAGNN)` and `I-GNN`;
+ - `data/` contains the necessary dataset files for NUS-WIDE, MIRFlickr, and MS-COCO;
+ - `models.py` contains the implementation of the `P-GNN-CON` and `I-GNN-CON`;
  
  Finally, `main.py` puts all of the above together and can be used to execute a full training run on MIRFlcikr or NUS-WIDE or MS-COCO.
 

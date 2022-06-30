@@ -14,7 +14,7 @@ from evaluate import fx_calc_map_label
 
 if __name__ == '__main__':
     # environmental setting: setting the following parameters based on your experimental environment.
-    os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     dataset = 'mirflickr'  # 'mirflickr' or 'NUS-WIDE-TC21' or 'MS-COCO'
     model = 'I-GNN'  # 'I-GNN' or 'P-GNN'
     embedding = 'glove'  # 'glove' or 'googlenews' or 'fasttext' or 'None'
@@ -22,44 +22,50 @@ if __name__ == '__main__':
     # data parameters
     DATA_DIR = 'data/' + dataset + '/'
     EVAL = False    # True for evaluation, False for training
-    INCOMPLETE = True   # True for incomplete-modal learning, vice versa
+    INCOMPLETE = False   # True for incomplete-modal learning, vice versa
 
     if dataset == 'mirflickr':
-        alpha = 0.2
-        beta = 0.2
+        alpha = 0.5
+        beta = 2
         max_epoch = 40
         batch_size = 100
         lr = 5e-5
-        lr2 = 4e-6
+        lr2 = 1e-7
         betas = (0.5, 0.999)
         t = 0.4
         gnn = 'GCN'  # 'GCN' or 'GAT'
         n_layers = 5    # number of GNN layers
-        k = 5
+        k = 8
+        temp = 0.22
+        gamma = 0.14
     elif dataset == 'NUS-WIDE-TC21':
-        alpha = 0.2
+        alpha = 0.8
         beta = 0.2
         max_epoch = 40
-        batch_size = 1024
+        batch_size = 2048
         lr = 5e-5
-        lr2 = 4e-6
+        lr2 = 1e-8
         betas = (0.5, 0.999)
         t = 0.4
         gnn = 'GCN'
-        n_layers = 4
-        k = 5
+        n_layers = 5
+        k = 8
+        temp = 0.22
+        gamma = 0.14
     elif dataset == 'MS-COCO':
-        alpha = 0.2
+        alpha = 2.8
         beta = 0.2
         max_epoch = 40
-        batch_size = 1024
+        batch_size = 512
         lr = 5e-5
-        lr2 = 1e-6
+        lr2 = 1e-7
         betas = (0.5, 0.999)
         t = 0.4
         gnn = 'GCN'
-        n_layers = 4
-        k = 5
+        n_layers = 5
+        k = 8
+        temp = 0.2
+        gamma = 0.14
     else:
         raise NameError("Invalid dataset name!")
 
@@ -82,7 +88,7 @@ if __name__ == '__main__':
 
     print('...Data loading is beginning...')
 
-    data_loader, input_data_par = get_loader(DATA_DIR, batch_size, False)
+    data_loader, input_data_par = get_loader(DATA_DIR, batch_size, INCOMPLETE, False)
 
     print('...Data loading is completed...')
 
@@ -106,19 +112,20 @@ if __name__ == '__main__':
         # Train and evaluate
         if INCOMPLETE:
             model_ft, img_acc_hist, txt_acc_hist, loss_hist = train_model(model_ft, data_loader, optimizer, alpha, beta,
-                                                                          max_epoch)
-            data_loader, input_data_par = get_loader(DATA_DIR, batch_size, True)
-            optimizer = optim.Adam(params_to_update, lr=lr2, betas=betas)
+                                                                          temp, gamma, max_epoch)
+            data_loader, input_data_par = get_loader(DATA_DIR, batch_size, True, True)
+            optimizer = optim.SGD(params_to_update, lr=lr2)
             model_ft, img_acc_hist, txt_acc_hist, loss_hist = train_model_incomplete(model_ft, data_loader, optimizer,
-                                                                                     alpha, beta, max_epoch)
+                                                                                     temp, gamma, alpha, beta, max_epoch)
         else:
             model_ft, img_acc_hist, txt_acc_hist, loss_hist = train_model(model_ft, data_loader, optimizer, alpha, beta,
-                                                                          max_epoch)
+                                                                          temp, gamma, max_epoch)
         print('...Training is completed...')
 
         torch.save(model_ft.state_dict(), 'model/DALGNN_' + dataset + '.pth')
 
     print('...Evaluation on testing data...')
+    model_ft.eval()
     view1_feature, view2_feature, view1_predict, view2_predict, classifiers, _, _, _, _ = model_ft(
         torch.tensor(input_data_par['img_test']).cuda(), torch.tensor(input_data_par['text_test']).cuda())
     label = input_data_par['label_test']

@@ -1,53 +1,22 @@
 from __future__ import print_function
 from __future__ import division
+import time
+import copy
+
+import numpy as np
 import torch
 import torch.nn as nn
 import torchvision
-import time
-import copy
+
 from evaluate import fx_calc_map_label
-import numpy as np
+from loss import cla_loss, mdl_loss, gan_loss, soft_con_loss
+
 
 print("PyTorch Version: ", torch.__version__)
 print("Torchvision Version: ", torchvision.__version__)
-criterion = nn.MultiLabelSoftMarginLoss()
-criterion_md = nn.CrossEntropyLoss()
 
 
-def calc_label_sim(label_1, label_2):
-    Sim = label_1.float().mm(label_2.float().t())
-    return Sim
-
-
-def calc_loss(view1_feature, view2_feature, view1_predict, view2_predict, labels_1, labels_2, alpha):
-    term1 = ((view1_predict - labels_1.float()) ** 2).sum(1).sqrt().mean() + ((view2_predict - labels_2.float()) ** 2).sum(1).sqrt().mean()
-    # term1 = criterion(view1_predict, labels_1) + criterion(view2_predict, labels_2)
-
-    cos = lambda x, y: x.mm(y.t()) / (
-        (x ** 2).sum(1, keepdim=True).sqrt().mm((y ** 2).sum(1, keepdim=True).sqrt().t())).clamp(min=1e-6) / 2.
-    theta11 = cos(view1_feature, view1_feature)
-    theta12 = cos(view1_feature, view2_feature)
-    theta22 = cos(view2_feature, view2_feature)
-    Sim11 = calc_label_sim(labels_1, labels_1).float()
-    Sim12 = calc_label_sim(labels_1, labels_2).float()
-    Sim22 = calc_label_sim(labels_2, labels_2).float()
-    term21 = ((1+torch.exp(theta11)).log() - Sim11 * theta11).mean()
-    term22 = ((1+torch.exp(theta12)).log() - Sim12 * theta12).mean()
-    term23 = ((1 + torch.exp(theta22)).log() - Sim22 * theta22).mean()
-    term2 = term21 + term22 + term23
-
-    im_loss = term1 + alpha * term2
-    return im_loss
-
-
-def calc_gan_loss(view1_modal_view1, view2_modal_view1, view1_modal_view2, view2_modal_view2, bs):
-    img_md = torch.ones(bs, dtype=torch.long).cuda()
-    txt_md = torch.zeros(bs, dtype=torch.long).cuda()
-    return criterion_md(view1_modal_view1, img_md) + criterion_md(view2_modal_view1, txt_md) + \
-           criterion_md(view1_modal_view2, img_md) + criterion_md(view2_modal_view2, txt_md)
-
-
-def train_model(model, data_loaders, optimizer, alpha, beta, num_epochs=500):
+def train_model(model, data_loaders, optimizer, alpha, beta, temp, gamma, num_epochs=500):
     since = time.time()
     # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     test_img_acc_history = []
@@ -98,11 +67,11 @@ def train_model(model, data_loaders, optimizer, alpha, beta, num_epochs=500):
                     view1_feature, view2_feature, view1_predict, view2_predict, _, \
                         view1_modal_view1, view2_modal_view1, view1_modal_view2, view2_modal_view2 = model(imgs, txts)
 
-                    bs = labels.shape[0]
-                    gan_loss = calc_gan_loss(view1_modal_view1, view2_modal_view1, view1_modal_view2, view2_modal_view2, bs)
-
-                    loss = calc_loss(view1_feature, view2_feature, view1_predict, view2_predict,
-                                     labels, labels, alpha) + beta * gan_loss
+                    c_loss = cla_loss(view1_predict, view2_predict, labels, labels)
+                    sc_loss = soft_con_loss(view1_feature, view2_feature, labels, temp, gamma)
+                    #m_loss = mdl_loss(view1_feature, view2_feature, labels, labels)
+                    g_loss = gan_loss(view1_modal_view1, view2_modal_view1, view1_modal_view2, view2_modal_view2)
+                    loss = alpha * c_loss + sc_loss + beta * g_loss
 
                     # backward + optimize only if in training phase
                     if phase == 'train':
@@ -172,7 +141,7 @@ def train_model(model, data_loaders, optimizer, alpha, beta, num_epochs=500):
     return model, test_img_acc_history, test_txt_acc_history, epoch_loss_history
 
 
-def train_model_incomplete(model, data_loaders, optimizer, alpha, beta, num_epochs=500):
+def train_model_incomplete(model, data_loaders, optimizer, alpha, beta, temp, gamma, num_epochs=500):
     since = time.time()
     # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     test_img_acc_history = []
@@ -183,11 +152,11 @@ def train_model_incomplete(model, data_loaders, optimizer, alpha, beta, num_epoc
     best_acc = 0.0
 
     for epoch in range(num_epochs):
-        print('Epoch {}/{}'.format(epoch + 1, num_epochs))
+        print('Epoch {}/{}'.format(epoch, num_epochs-1))
         print('-' * 20)
 
         # Each epoch has a training and validation phase
-        for phase in ['train', 'test']:
+        for phase in ['test', 'train']:
             if phase == 'train':
                 # Set model to training mode
                 model.train()
@@ -237,11 +206,11 @@ def train_model_incomplete(model, data_loaders, optimizer, alpha, beta, num_epoc
                         view1_feature, view2_feature, view1_predict, view2_predict, _, \
                             view1_modal_view1, view2_modal_view1, view1_modal_view2, view2_modal_view2 = model(imgs, txts)
 
-                        bs = labels.shape[0]
-                        gan_loss = calc_gan_loss(view1_modal_view1, view2_modal_view1, view1_modal_view2, view2_modal_view2, bs)
-
-                        loss = calc_loss(view1_feature, view2_feature, view1_predict, view2_predict,
-                                        labels, labels, alpha) + beta * gan_loss
+                        c_loss = cla_loss(view1_predict, view2_predict, labels, labels)
+                        sc_loss = soft_con_loss(view1_feature, view2_feature, labels, temp, gamma)
+                        # m_loss = mdl_loss(view1_feature, view2_feature, labels, labels)
+                        g_loss = gan_loss(view1_modal_view1, view2_modal_view1, view1_modal_view2, view2_modal_view2)
+                        loss = alpha * c_loss + sc_loss + beta * g_loss
 
                         # backward + optimize only if in training phase
                         if phase == 'train':
@@ -264,11 +233,13 @@ def train_model_incomplete(model, data_loaders, optimizer, alpha, beta, num_epoc
                             labels = labels.float().cuda()
                         view1_feature, view2_feature, view1_predict, view2_predict, _, \
                             view1_modal_view1, view2_modal_view1, view1_modal_view2, view2_modal_view2 = model(imgs, txts)
-                        bs = labels.shape[0]
-                        gan_loss = calc_gan_loss(view1_modal_view1, view2_modal_view1, view1_modal_view2,
-                                                 view2_modal_view2, bs)
-                        loss = calc_loss(view1_feature, view2_feature, view1_predict, view2_predict,
-                                         labels, labels, alpha) + beta * gan_loss
+
+                        c_loss = cla_loss(view1_predict, view2_predict, labels, labels)
+                        sc_loss = soft_con_loss(view1_feature, view2_feature, labels, temp, gamma)
+                        # m_loss = mdl_loss(view1_feature, view2_feature, labels, labels)
+                        g_loss = gan_loss(view1_modal_view1, view2_modal_view1, view1_modal_view2, view2_modal_view2)
+                        loss = alpha * c_loss + 0.1 * sc_loss + beta * g_loss
+
                         running_loss += loss.item()
                         t_imgs.append(view1_feature.cpu().numpy())
                         t_txts.append(view2_feature.cpu().numpy())
@@ -310,7 +281,7 @@ def train_model_incomplete(model, data_loaders, optimizer, alpha, beta, num_epoc
 
     time_elapsed = time.time() - since
     print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
-    print('Best average ACC: {:4f}'.format(best_acc))
+    print('Best average MAP: {:4f}'.format(best_acc))
 
     # load best model weights
     model.load_state_dict(best_model_wts)
