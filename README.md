@@ -13,9 +13,9 @@ This repository contains the author's implementation in PyTorch for the AAAI-21 
 
 ## Datasets
 You can download the features of the datasets from:
- - MIRFlickr, [OneDrive](https://pkueducn-my.sharepoint.com/:f:/g/personal/zszhong_pku_edu_cn/EpLD8yNN2lhIpBgQ7Kl8LKABzM68icvJJahchO7pYNPV1g?e=IYoeqn), [BaiduPan(password: 8dub)](https://pan.baidu.com/s/1o5jSliFjAezBavyBOiJxew)
+ - MIRFlickr, [OneDrive](https://pkueducn-my.sharepoint.com/:f:/g/personal/zszhong_pku_edu_cn/EpLD8yNN2lhIpBgQ7Kl8LKABzM68icvJJahchO7pYNPV1g?e=IYoeqn), [BaiduPan(password: b04z)](https://pan.baidu.com/s/1g1c7Ne7y1BDys6pMh2yhYw)
  - NUS-WIDE(top-21 concepts),
- - MS-COCO
+ - MS-COCO[BaiduPan(password: 5uvp)](https://pan.baidu.com/s/1uoV4K1mBwX7N1TVmNEiPgA)
  
 ## Implementation
 
