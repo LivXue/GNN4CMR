@@ -56,5 +56,6 @@ If you find our work or the code useful, please consider cite our paper using:
   author={Qian, Shengsheng and Xue, Dizhan and Fang, Quan and Xu, Changsheng}, 
   year={2022},  
   pages={1-18},  
-  doi={10.1109/TPAMI.2022.3188547}}
+  doi={10.1109/TPAMI.2022.3188547}
+}
 ```
