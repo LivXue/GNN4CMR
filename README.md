@@ -50,4 +50,11 @@ If you find our work or the code useful, please consider cite our paper using:
   year={2021}, 
   pages={2440-2448} 
 }
+@article{9815553, 
+  title={Integrating Multi-Label Contrastive Learning With Dual Adversarial Graph Neural Networks for Cross-Modal Retrieval}, 
+  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence}, 
+  author={Qian, Shengsheng and Xue, Dizhan and Fang, Quan and Xu, Changsheng}, 
+  year={2022},  
+  pages={1-18},  
+  doi={10.1109/TPAMI.2022.3188547}}
 ```
