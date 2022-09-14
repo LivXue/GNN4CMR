@@ -238,7 +238,7 @@ def train_model_incomplete(model, data_loaders, optimizer, alpha, beta, temp, ga
                         sc_loss = soft_con_loss(view1_feature, view2_feature, labels, temp, gamma)
                         # m_loss = mdl_loss(view1_feature, view2_feature, labels, labels)
                         g_loss = gan_loss(view1_modal_view1, view2_modal_view1, view1_modal_view2, view2_modal_view2)
-                        loss = alpha * c_loss + 0.1 * sc_loss + beta * g_loss
+                        loss = alpha * c_loss + sc_loss + beta * g_loss
 
                         running_loss += loss.item()
                         t_imgs.append(view1_feature.cpu().numpy())
