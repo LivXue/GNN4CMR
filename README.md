@@ -1,6 +1,6 @@
 ## Integrating Multi-Label Contrastive Learning with Dual Adversarial Graph Neural Networks for Cross-Modal Retrieval
 
-This repository contains the author's implementation in PyTorch for the AAAI-21 paper "Dual Adversarial Label-aware Graph Neural Networks for Cross-modal Retrieval" and the TPAMI paper "Integrating Multi-Label Contrastive Learning with Dual Adversarial Graph Neural Networks for Cross-Modal Retrieval".
+This repository contains the author's implementation in PyTorch for the AAAI-21 paper "Dual Adversarial Label-aware Graph Neural Networks for Cross-modal Retrieval" and the TPAMI-22 paper "Integrating Multi-Label Contrastive Learning with Dual Adversarial Graph Neural Networks for Cross-Modal Retrieval".
 
 
 ## Dependencies
